@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,23 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Gamer-specific colors
+        gamer: {
+          red: "hsl(var(--gamer-red))",
+          gold: "hsl(var(--gamer-gold))",
+          dark: "hsl(var(--gamer-dark))",
+          gray: "hsl(var(--gamer-gray))",
+        },
+      },
+      backgroundImage: {
+        'gradient-demonic': 'var(--gradient-demonic)',
+        'gradient-gold': 'var(--gradient-gold)',
+        'gradient-dark': 'var(--gradient-dark)',
+      },
+      boxShadow: {
+        'gamer': 'var(--shadow-gamer)',
+        'glow-red': 'var(--glow-red)',
+        'glow-gold': 'var(--glow-gold)',
       },
       borderRadius: {
         lg: "var(--radius)",
