@@ -7,6 +7,10 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import Dashboard from "./pages/Dashboard";
 import Rankings from "./pages/Rankings";
 import Events from "./pages/Events";
+import Players from "./pages/Players";
+import Stats from "./pages/Stats";
+import EventsAdmin from "./pages/admin/EventsAdmin";
+import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +35,26 @@ const App = () => (
           <Route path="/events" element={
             <DashboardLayout>
               <Events />
+            </DashboardLayout>
+          } />
+          <Route path="/players" element={
+            <DashboardLayout>
+              <Players />
+            </DashboardLayout>
+          } />
+          <Route path="/stats" element={
+            <DashboardLayout>
+              <Stats />
+            </DashboardLayout>
+          } />
+          <Route path="/admin/events" element={
+            <DashboardLayout>
+              <EventsAdmin />
+            </DashboardLayout>
+          } />
+          <Route path="/admin/settings" element={
+            <DashboardLayout>
+              <Settings />
             </DashboardLayout>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
