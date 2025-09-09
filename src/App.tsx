@@ -11,6 +11,7 @@ import Players from "./pages/Players";
 import Stats from "./pages/Stats";
 import EventsAdmin from "./pages/admin/EventsAdmin";
 import Settings from "./pages/admin/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,11 @@ const App = () => (
           <Route path="/admin/settings" element={
             <DashboardLayout>
               <Settings />
+            </DashboardLayout>
+          } />
+          <Route path="/profile/:playerId" element={
+            <DashboardLayout>
+              <Profile />
             </DashboardLayout>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
