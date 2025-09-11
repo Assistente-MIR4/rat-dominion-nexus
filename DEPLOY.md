@@ -2,9 +2,9 @@
 
 ## Pré-requisitos
 - VPS com Docker e Docker Compose instalados
-- Domínio apontado para seu VPS (opcional, mas recomendado)
+- Domínio apontado para seu VPS (opcional, mas recomendado para SSL)
 
-## Passos para Deploy
+## Deploy Simples (Uma Execução)
 
 ### 1. Preparar o servidor
 ```bash
@@ -15,13 +15,9 @@ sudo sh get-docker.sh
 # Instalar Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-
-# Verificar instalação
-docker --version
-docker-compose --version
 ```
 
-### 2. Fazer upload do código
+### 2. Fazer upload do projeto
 ```bash
 # No seu computador local, compactar o projeto
 tar -czf rat-clan-dashboard.tar.gz .
@@ -35,98 +31,121 @@ tar -xzf rat-clan-dashboard.tar.gz
 cd rat-clan-dashboard/
 ```
 
-### 3. Configurar domínio (opcional)
-Se você tem um domínio, edite `docker-compose.yml` e adicione:
-```yaml
-services:
-  rat-clan-dashboard:
-    # ... configurações existentes
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ratclan.rule=Host(`seudominio.com`)"
-      - "traefik.http.routers.ratclan.entrypoints=websecure"
-      - "traefik.http.routers.ratclan.tls.certresolver=myresolver"
-```
-
-### 4. Fazer deploy
+### 3. Executar aplicação (COMANDO ÚNICO)
 ```bash
-# Construir e iniciar
+# Para executar apenas a aplicação (HTTP na porta 80)
 docker-compose up -d --build
 
-# Verificar se está funcionando
-docker-compose ps
-docker-compose logs rat-clan-dashboard
+# OU para executar com SSL (HTTPS + painel admin na porta 8080)
+docker-compose --profile ssl up -d --build
 ```
 
-### 5. Configurar SSL com Nginx Proxy Manager (recomendado)
-```bash
-# Adicionar proxy manager
-version: '3.8'
-services:
-  nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
-  
-  rat-clan-dashboard:
-    # ... suas configurações
-    ports:
-      - "3000:80"  # Mudar porta para evitar conflito
-```
+**Pronto! Sua aplicação estará rodando.**
 
-## Usuário Padrão para Teste
+## Acessos
 
-**IMPORTANTE**: Acesse a aplicação e cadastre um usuário através da tela de login.
+### Aplicação Principal
+- **HTTP**: `http://SEU_IP_VPS` (porta 80)
+- **HTTPS**: `https://SEU_DOMINIO` (se configurou SSL)
 
-### Para criar usuário de teste:
-1. Acesse seu IP da VPS no navegador
-2. Clique em "Cadastrar" na tela de login
+### Painel SSL (se executou com --profile ssl)
+- **Admin**: `http://SEU_IP_VPS:8080`
+  - Email: `admin@example.com`
+  - Senha: `changeme`
+
+### Login na Aplicação
+1. Acesse a aplicação no navegador
+2. Clique em "Cadastrar"
 3. Use: 
    - Email: `admin@ratclan.com`
    - Senha: `RatClan2024!`
 
-### Configuração do Supabase
-No Supabase Dashboard:
-1. Vá em Authentication > Settings
-2. Desabilite "Confirm email" para testes mais rápidos
-3. Configure "Site URL" para o IP/domínio da sua VPS
-4. Em Authentication > URL Configuration, adicione seu domínio nas "Redirect URLs"
+## Configuração do Supabase
+
+**IMPORTANTE**: Configure as URLs no Supabase Dashboard:
+
+1. **Authentication > Settings**:
+   - Site URL: `http://SEU_IP_VPS` ou `https://SEU_DOMINIO`
+   - Desabilite "Confirm email" para testes
+
+2. **Authentication > URL Configuration**:
+   - Redirect URLs: Adicione sua URL completa
+
+3. **Authentication > Providers**:
+   - **Email**: Habilite "Login" e "Signup"
+   - **Google**: Configure se desejar login social
 
 ## Comandos Úteis
 
 ```bash
-# Ver logs
-docker-compose logs -f
+# Ver logs da aplicação
+docker-compose logs -f rat-clan-dashboard
+
+# Ver status dos serviços
+docker-compose ps
 
 # Reiniciar aplicação
-docker-compose restart
+docker-compose restart rat-clan-dashboard
 
-# Parar aplicação
+# Parar tudo
 docker-compose down
 
-# Atualizar aplicação
-git pull  # se usando git
-docker-compose up -d --build
+# Parar e remover volumes
+docker-compose down -v
 
-# Backup (se necessário)
-docker-compose exec rat-clan-dashboard /bin/sh
+# Atualizar aplicação
+docker-compose up -d --build rat-clan-dashboard
 ```
+
+## SSL com Domínio (Opcional)
+
+Se executou com `--profile ssl`:
+
+1. Acesse `http://SEU_IP:8080`
+2. Login: `admin@example.com` / `changeme`
+3. Vá em "Proxy Hosts" > "Add Proxy Host"
+4. Configure:
+   - **Domain Names**: `seudominio.com`
+   - **Forward Hostname/IP**: `rat-clan-dashboard`
+   - **Forward Port**: `80`
+   - **SSL**: Marque "Request a new SSL Certificate"
 
 ## Troubleshooting
 
-1. **Aplicação não carrega**: Verifique se a porta 80 está aberta no firewall
-2. **Erro de autenticação**: Verifique as URLs no Supabase Dashboard
-3. **Docker não inicia**: Verifique logs com `docker-compose logs`
+1. **Aplicação não carrega**: 
+   ```bash
+   docker-compose logs rat-clan-dashboard
+   curl http://localhost # dentro do servidor
+   ```
 
-## Melhorias Recomendadas
+2. **Erro de autenticação**: Verifique URLs no Supabase
 
-1. **SSL Certificate**: Configure Let's Encrypt
-2. **Backup**: Configure backup automático do Supabase
-3. **Monitoring**: Adicione monitoramento com Portainer
-4. **CI/CD**: Configure deploy automático com GitHub Actions
+3. **Porta 80 ocupada**: 
+   ```bash
+   sudo netstat -tlnp | grep :80
+   sudo systemctl stop apache2  # se Apache estiver rodando
+   ```
+
+4. **Problemas de build**:
+   ```bash
+   docker-compose down
+   docker system prune -f
+   docker-compose up -d --build
+   ```
+
+## Arquivos Importantes
+
+- **docker-compose.yml**: Configuração principal
+- **.env**: Variáveis do Supabase (já incluídas automaticamente)
+- **nginx.conf**: Configuração do servidor web
+- **Dockerfile**: Build da aplicação
+
+## Backup Recomendado
+
+```bash
+# Backup dos dados (se necessário)
+docker-compose exec rat-clan-dashboard tar -czf /tmp/backup.tar.gz /usr/share/nginx/html
+
+# Backup das configurações
+tar -czf backup-config.tar.gz docker-compose.yml nginx.conf .env
+```
