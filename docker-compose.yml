@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  rat-clan-dashboard:
+    build: .
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - rat-clan-network
+
+networks:
+  rat-clan-network:
+    driver: bridge
