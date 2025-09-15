@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   rat-clan-dashboard:
     build: 
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8081:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
