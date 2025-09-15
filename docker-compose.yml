@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     # Remover ports - deixar apenas o Traefik gerenciar
-    # ports:
-    #   - "8081:80"
+    ports:
+      - "8081:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
