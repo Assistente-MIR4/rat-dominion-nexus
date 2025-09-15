@@ -1,46 +1,86 @@
-# Deploy RAT Clan Dashboard na VPS
+# Deploy do RAT Clan Dashboard
 
-## Pré-requisitos
-- VPS com Docker e Docker Compose instalados
-- Domínio apontado para seu VPS (opcional, mas recomendado para SSL)
+Este documento fornece instruções para fazer o deploy do RAT Clan Dashboard em uma VPS usando Docker e Docker Compose.
 
-## Deploy Simples (Uma Execução)
+## 🚀 Deploy Automático (Recomendado)
 
-### 1. Preparar o servidor
+### Método Simples - Um Comando Apenas
+
+1. **Faça upload dos arquivos** para sua VPS
+2. **Execute o script de deploy**:
+
 ```bash
-# Instalar Docker (Ubuntu/Debian)
+chmod +x deploy.sh
+./deploy.sh
+```
+
+O script automaticamente:
+- ✅ Verifica se Docker e Docker Compose estão instalados  
+- ✅ Valida se todos os arquivos necessários estão presentes
+- ✅ Para containers existentes
+- ✅ Constrói e inicia a aplicação
+- ✅ Verifica se tudo está funcionando
+
+Após o deploy, acesse: `http://SEU_IP:80`
+
+---
+
+## 📋 Deploy Manual (Passo a Passo)
+
+### Pré-requisitos
+
+- VPS com Docker e Docker Compose instalados
+- Domínio (opcional, para SSL)
+
+### 1. Instalar Docker na VPS
+
+```bash
+# Instalar Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sh get-docker.sh
 
 # Instalar Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+
+# Adicionar usuário ao grupo docker (opcional)
+sudo usermod -aG docker $USER
+# Relogar após este comando
 ```
 
-### 2. Fazer upload do projeto
+### 2. Fazer Upload dos Arquivos
+
+Faça upload de todos os arquivos do projeto para sua VPS:
+
 ```bash
-# No seu computador local, compactar o projeto
-tar -czf rat-clan-dashboard.tar.gz .
+# Exemplo usando scp (rode no seu computador local)
+scp -r . user@seu-servidor:/home/user/rat-clan-dashboard/
 
-# Enviar para VPS via scp
-scp rat-clan-dashboard.tar.gz user@seu-vps:/home/user/
-
-# No VPS, extrair
-cd /home/user/
-tar -xzf rat-clan-dashboard.tar.gz
-cd rat-clan-dashboard/
+# Ou usando rsync
+rsync -avz --exclude 'node_modules' . user@seu-servidor:/home/user/rat-clan-dashboard/
 ```
 
-### 3. Executar aplicação (COMANDO ÚNICO)
+### 3. Configurar Variáveis de Ambiente
+
+O arquivo `.env` já está configurado. Verifique se as URLs estão corretas:
+
 ```bash
-# Para executar apenas a aplicação (HTTP na porta 80)
+cd /home/user/rat-clan-dashboard
+cat .env
+
+# Se precisar editar:
+nano .env
+```
+
+### 4. Executar a Aplicação
+
+```bash
+# Método básico (HTTP na porta 80)
 docker-compose up -d --build
 
-# OU para executar com SSL (HTTPS + painel admin na porta 8080)
+# OU com SSL usando Nginx Proxy Manager (HTTPS)
 docker-compose --profile ssl up -d --build
 ```
-
-**Pronto! Sua aplicação estará rodando.**
 
 ## Acessos
 
